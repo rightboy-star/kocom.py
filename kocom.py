@@ -9,6 +9,7 @@
  apt-get install mosquitto
  python3 -m pip install pyserial
  python3 -m pip install paho-mqtt
+ python3 -m pip install typing_extensions
 '''
 import os
 import time
@@ -51,7 +52,7 @@ room_h_dic = {'livingroom':'00', 'myhome':'00', 'room1':'01', 'room2':'02', 'roo
 # mqtt functions ----------------------------
 
 def init_mqttc():
-    mqttc = mqtt.Client()
+    mqttc = mqtt.Client(mqtt.CallbackAPIVersion.VERSION1)
     mqttc.on_message = mqtt_on_message
     mqttc.on_subscribe = mqtt_on_subscribe
     mqttc.on_connect = mqtt_on_connect
@@ -522,7 +523,7 @@ def mqtt_on_message(mqttc, obj, msg):
     # kocom/livingroom/fan/set_preset_mode/command
     elif 'fan' in topic_d and 'set_preset_mode' in topic_d:
         dev_id = device_h_dic['fan'] + room_h_dic.get(topic_d[1])
-        onoff_dic = {'off':'0000', 'on':'1101'}  
+        onoff_dic = {'off':'0000', 'on':'1101'}
        #onoff_dic = {'off':'1000', 'on':'1100'}
         speed_dic = {'Off':'00', 'Low':'40', 'Medium':'80', 'High':'c0'}
         if command == 'Off':
@@ -537,7 +538,7 @@ def mqtt_on_message(mqttc, obj, msg):
     # kocom/livingroom/fan/command
     elif 'fan' in topic_d:
         dev_id = device_h_dic['fan'] + room_h_dic.get(topic_d[1])
-        onoff_dic = {'off':'0000', 'on':'1101'}  
+        onoff_dic = {'off':'0000', 'on':'1101'}
        #onoff_dic = {'off':'1000', 'on':'1100'}
         speed_dic = {'Low':'40', 'Medium':'80', 'High':'c0'}
         init_fan_mode = config.get('User', 'init_fan_mode')
@@ -768,7 +769,7 @@ def publish_discovery(dev, sub=''):
             'curr_temp_t': 'kocom/room/thermo/{}/state'.format(num),
             'curr_temp_tpl': '{{ value_json.cur_temp }}',
             'modes': ['off', 'heat'],
-            'min_temp': 20,
+            'min_temp': 5,
             'max_temp': 30,
             'ret': 'false',
             'qos': 0,
@@ -1006,3 +1007,4 @@ if __name__ == "__main__":
     poll_timer.start()
 
     discovery()
+
